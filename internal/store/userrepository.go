@@ -7,6 +7,10 @@ type UserRepository struct {
 }
 
 func (r *UserRepository) Create(u *model.User) (*model.User, error) {
+	if err := u.BeforeCreation(); err != nil {
+		return nil, err
+	}
+
 	err := r.store.db.Create(u).Error
 	if err != nil {
 		return nil, err
@@ -40,8 +44,13 @@ func (r *UserRepository) UpdatePasswordByEmail(email, password string) (*model.U
 		return nil, err
 	}
 
+	//FIXME: only password field
 	u.Email = email
-	u.EncryptedPassword = password
+	u.Password = password
+
+	if err := u.BeforeCreation(); err != nil {
+		return nil, err
+	}
 
 	if err := r.store.db.Save(u).Error; err != nil {
 		return nil, err
