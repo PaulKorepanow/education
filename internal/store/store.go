@@ -1,14 +1,14 @@
 package store
 
 import (
-	"database/sql"
-
-	_ "github.com/lib/pq"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 type Store struct {
-	config *Config
-	db     *sql.DB
+	config         *Config
+	db             *gorm.DB
+	userRepository *UserRepository
 }
 
 func NewStore(config *Config) *Store {
@@ -18,12 +18,8 @@ func NewStore(config *Config) *Store {
 }
 
 func (s *Store) Open() error {
-	db, err := sql.Open("postgres", s.config.DataBaseURL)
+	db, err := gorm.Open(postgres.Open(s.config.DataBaseURL), &gorm.Config{})
 	if err != nil {
-		return err
-	}
-
-	if err := db.Ping(); err != nil {
 		return err
 	}
 
@@ -31,6 +27,21 @@ func (s *Store) Open() error {
 	return nil
 }
 
-func (s *Store) Close() {
-	s.db.Close()
+func (s *Store) Close() error {
+	sqlDB, err := s.db.DB()
+	if err != nil {
+		return err
+	}
+	sqlDB.Close()
+	return nil
+}
+
+func (s *Store) User() *UserRepository {
+	if s.userRepository != nil {
+		return s.userRepository
+	}
+
+	s.userRepository = &UserRepository{store: s}
+
+	return s.userRepository
 }

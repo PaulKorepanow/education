@@ -34,7 +34,11 @@ func (s *Server) Start() error {
 	if err := s.configureStore(); err != nil {
 		return err
 	}
-	defer s.store.Close()
+	defer func() {
+		if err := s.store.Close(); err != nil {
+
+		}
+	}()
 	return http.ListenAndServe(s.config.BindAddr, s.router)
 }
 
