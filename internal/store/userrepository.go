@@ -11,6 +11,10 @@ func (r *UserRepository) Create(u *model.User) (*model.User, error) {
 		return nil, err
 	}
 
+	if err := u.Validate(); err != nil {
+		return nil, err
+	}
+
 	err := r.store.db.Create(u).Error
 	if err != nil {
 		return nil, err
@@ -20,13 +24,6 @@ func (r *UserRepository) Create(u *model.User) (*model.User, error) {
 		return nil, err
 	}
 	return &user, nil
-}
-
-func (r *UserRepository) CreateInBatch(users *[]model.User) error {
-	if err := r.store.db.CreateInBatches(users, len(*users)).Error; err != nil {
-		return err
-	}
-	return nil
 }
 
 func (r *UserRepository) FindByEmail(email string) (*model.User, error) {

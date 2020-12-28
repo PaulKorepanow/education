@@ -36,7 +36,7 @@ func (s *Server) Start() error {
 	}
 	defer func() {
 		if err := s.store.Close(); err != nil {
-
+			//FIXME: Что с этим делать?
 		}
 	}()
 	return http.ListenAndServe(s.config.BindAddr, s.router)
