@@ -1,10 +1,11 @@
 package app
 
 import (
-	"bookLibrary/internal/store"
+	"bookLibrary/internal/store/sqlstore"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
-	"io"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 	"net/http"
 )
 
@@ -12,14 +13,15 @@ type Server struct {
 	config *Config
 	logger *logrus.Logger
 	router *mux.Router
-	store  *store.Store
+	store  sqlstore.Store
 }
 
-func NewServer(config *Config) *Server {
+func NewServer(config *Config, db sqlstore.Store) *Server {
 	return &Server{
 		config: config,
 		logger: logrus.New(),
 		router: mux.NewRouter(),
+		store:  db,
 	}
 }
 
@@ -31,14 +33,6 @@ func (s *Server) Start() error {
 
 	s.configureRouter()
 
-	if err := s.configureStore(); err != nil {
-		return err
-	}
-	defer func() {
-		if err := s.store.Close(); err != nil {
-			//FIXME: Что с этим делать?
-		}
-	}()
 	return http.ListenAndServe(s.config.BindAddr, s.router)
 }
 
@@ -53,22 +47,19 @@ func (s *Server) configureLogger() error {
 }
 
 func (s *Server) configureRouter() {
-	s.router.HandleFunc("/hello", s.handleHallo())
+	s.router.HandleFunc("/users", s.handleUsersCreate()).Methods("POST")
 }
 
-func (s *Server) handleHallo() http.HandlerFunc {
-	return func(writer http.ResponseWriter, request *http.Request) {
-		io.WriteString(writer, "hallo")
+func InitStore(config string) (*sqlstore.SqlStore, error) {
+	db, err := gorm.Open(postgres.Open(config), &gorm.Config{})
+	if err != nil {
+		return nil, err
 	}
+
+	return sqlstore.NewStore(db), nil
 }
 
-func (s *Server) configureStore() error {
-	st := store.NewStore(s.config.Store)
-	if err := st.Open(); err != nil {
-		return err
-	}
-	s.logger.Info("connection to DB is done")
-
-	s.store = st
-	return nil
+func (s *Server) ServerHTTP(w http.ResponseWriter, r *http.Request) {
+	s.configureRouter()
+	s.router.ServeHTTP(w, r)
 }

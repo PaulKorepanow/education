@@ -24,7 +24,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	s := app.NewServer(config)
+	db, err := app.InitStore(config.Store)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	s := app.NewServer(config, db)
 	if err := s.Start(); err != nil {
 		log.Fatal(err)
 	}

@@ -7,10 +7,10 @@ import (
 )
 
 type User struct {
-	ID                int
-	Email             string
+	ID                int    `json:"id"`
+	Email             string `json:"email"`
 	Password          string `gorm:"-"`
-	EncryptedPassword string
+	EncryptedPassword string `json:"encrypted_password"`
 }
 
 func (u *User) BeforeCreation() error {

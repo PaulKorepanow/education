@@ -1,32 +1,37 @@
-package store
+package sqlstore
 
-import "bookLibrary/internal/model"
+import (
+	"bookLibrary/internal/model"
+)
 
-type UserRepository struct {
-	store *Store
+type UserRepository interface {
+	Create(u *model.User) error
+	FindByEmail(email string) (*model.User, error)
+	UpdatePasswordByEmail(email, password string) (*model.User, error)
+	DeleteByEmail(email string) error
 }
 
-func (r *UserRepository) Create(u *model.User) (*model.User, error) {
+type UserRep struct {
+	store *SqlStore
+}
+
+func (r *UserRep) Create(u *model.User) error {
 	if err := u.BeforeCreation(); err != nil {
-		return nil, err
+		return err
 	}
 
 	if err := u.Validate(); err != nil {
-		return nil, err
+		return err
 	}
 
 	err := r.store.db.Create(u).Error
 	if err != nil {
-		return nil, err
+		return err
 	}
-	var user model.User
-	if err := r.store.db.Last(&user).Error; err != nil {
-		return nil, err
-	}
-	return &user, nil
+	return nil
 }
 
-func (r *UserRepository) FindByEmail(email string) (*model.User, error) {
+func (r *UserRep) FindByEmail(email string) (*model.User, error) {
 	var u model.User
 	err := r.store.db.Where("email = ?", email).First(&u).Error
 	if err != nil {
@@ -35,7 +40,7 @@ func (r *UserRepository) FindByEmail(email string) (*model.User, error) {
 	return &u, nil
 }
 
-func (r *UserRepository) UpdatePasswordByEmail(email, password string) (*model.User, error) {
+func (r *UserRep) UpdatePasswordByEmail(email, password string) (*model.User, error) {
 	u, err := r.FindByEmail(email)
 	if err != nil {
 		return nil, err
@@ -55,7 +60,7 @@ func (r *UserRepository) UpdatePasswordByEmail(email, password string) (*model.U
 	return u, nil
 }
 
-func (r *UserRepository) DeleteByEmail(email string) error {
+func (r *UserRep) DeleteByEmail(email string) error {
 	var u model.User
 	if err := r.store.db.Where("email = ?", email).Delete(&u).Error; err != nil {
 		return err
