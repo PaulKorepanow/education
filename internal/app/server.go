@@ -1,6 +1,7 @@
 package app
 
 import (
+	store "bookLibrary/internal/store"
 	"bookLibrary/internal/store/sqlstore"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -13,10 +14,10 @@ type Server struct {
 	config *Config
 	logger *logrus.Logger
 	router *mux.Router
-	store  sqlstore.Store
+	store  store.Store
 }
 
-func NewServer(config *Config, db sqlstore.Store) *Server {
+func NewServer(config *Config, db store.Store) *Server {
 	return &Server{
 		config: config,
 		logger: logrus.New(),

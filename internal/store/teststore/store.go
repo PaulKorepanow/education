@@ -2,7 +2,7 @@ package teststore
 
 import (
 	"bookLibrary/internal/model"
-	"bookLibrary/internal/store/sqlstore"
+	"bookLibrary/internal/store"
 )
 
 type TestStore struct {
@@ -13,7 +13,7 @@ func NewTestStore() *TestStore {
 	return &TestStore{}
 }
 
-func (s *TestStore) User() sqlstore.UserRepository {
+func (s *TestStore) User() store.UserRepository {
 	if s.UserRep != nil {
 		return &s.UserRep
 	}
