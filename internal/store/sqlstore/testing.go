@@ -4,14 +4,34 @@ import (
 	"fmt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+	"log"
+	"os"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestStore(t *testing.T, databaseURL string) (*SqlStore, func(...string)) {
 	t.Helper()
 
-	st, err := gorm.Open(postgres.Open(databaseURL), &gorm.Config{})
+	newLogger := logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags),
+		logger.Config{
+			SlowThreshold: time.Second,
+			Colorful:      false,
+			LogLevel:      logger.Silent,
+		},
+	)
+
+	newLogger.LogMode(logger.Silent)
+
+	st, err := gorm.Open(
+		postgres.Open(databaseURL),
+		&gorm.Config{
+			Logger: newLogger,
+		},
+	)
 	if err != nil {
 		t.Fatal(err)
 	}

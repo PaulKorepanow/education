@@ -1,10 +1,11 @@
 package main
 
 import (
-	"bookLibrary/internal/app"
+	"bookLibrary/internal/server"
 	"flag"
 	"github.com/BurntSushi/toml"
 	"log"
+	"os"
 )
 
 var (
@@ -13,24 +14,25 @@ var (
 
 func init() {
 	flag.StringVar(&configPath, "config-path", "configs/apiserver.toml", "path to config")
+	os.Setenv("db_log_level", "0")
 }
 
 func main() {
 	flag.Parse()
 
-	config := app.NewConfig()
+	config := server.NewConfig()
 	_, err := toml.DecodeFile(configPath, config)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	db, err := app.InitStore(config.Store)
+	db, err := server.ConnectToDB(config.Store)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	s := app.NewServer(config, db)
-	if err := s.Start(); err != nil {
+	s := server.NewServer(db)
+	if err := s.Start(config); err != nil {
 		log.Fatal(err)
 	}
 }

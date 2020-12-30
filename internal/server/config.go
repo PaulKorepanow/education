@@ -1,4 +1,4 @@
-package app
+package server
 
 type Config struct {
 	BindAddr string `toml:"bind_addr"`

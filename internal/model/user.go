@@ -1,6 +1,7 @@
 package model
 
 import (
+	"encoding/json"
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
 	"golang.org/x/crypto/bcrypt"
@@ -26,6 +27,18 @@ func (u *User) BeforeCreation() error {
 	return nil
 }
 
+func (u User) Validate() error {
+	return validation.ValidateStruct(
+		&u,
+		validation.Field(&u.Email, validation.Required, is.Email),
+		validation.Field(&u.Password, validation.Required, validation.Length(8, 100)),
+	)
+}
+
+func (u *User) Marshal() ([]byte, error) {
+	return json.Marshal(u)
+}
+
 func encryptedString(s string) (string, error) {
 	b, err := bcrypt.GenerateFromPassword([]byte(s), bcrypt.MinCost)
 	if err != nil {
@@ -33,11 +46,4 @@ func encryptedString(s string) (string, error) {
 	}
 
 	return string(b), nil
-}
-
-func (u User) Validate() error {
-	return validation.ValidateStruct(&u,
-		validation.Field(&u.Email, validation.Required, is.Email),
-		validation.Field(&u.Password, validation.Required, validation.Length(8, 100)),
-	)
 }
