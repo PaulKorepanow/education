@@ -27,5 +27,27 @@ func TestHandler_handleUsersCreate(t *testing.T) {
 	assert.NoError(t, err)
 
 	ts.ServeHttp(rr, request)
+	assert.Equal(t, http.StatusCreated, rr.Code)
+}
+
+func TestHandler_handleSessions(t *testing.T) {
+	testDB := teststore.NewTestStore()
+	testDB.User().Create(model.TestUser(t))
+
+	ts := server.NewServer(testDB)
+
+	rr := httptest.NewRecorder()
+
+	user, err := model.TestUser(t).Marshal()
+	assert.NoError(t, err)
+
+	request, err := http.NewRequest(
+		http.MethodPost,
+		"/sessions",
+		bytes.NewBuffer(user),
+	)
+	assert.NoError(t, err)
+
+	ts.ServeHttp(rr, request)
 	assert.Equal(t, http.StatusOK, rr.Code)
 }

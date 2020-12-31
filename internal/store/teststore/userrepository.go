@@ -8,6 +8,9 @@ import (
 type UserRep map[string]*model.User
 
 func (r UserRep) Create(u *model.User) error {
+	if err := u.BeforeCreation(); err != nil {
+		return err
+	}
 	if _, ok := r[u.Email]; ok {
 		return errors.New("duplicate email")
 	}

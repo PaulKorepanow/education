@@ -81,4 +81,5 @@ func (s *Server) configureLogger(config *Config) error {
 
 func (s *Server) configureRouter() {
 	s.router.HandleFunc("/users", s.handleUsersCreate()).Methods("POST")
+	s.router.HandleFunc("/sessions", s.handleSession()).Methods("POST")
 }

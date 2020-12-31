@@ -5,7 +5,6 @@ import (
 	"flag"
 	"github.com/BurntSushi/toml"
 	"log"
-	"os"
 )
 
 var (
@@ -14,7 +13,6 @@ var (
 
 func init() {
 	flag.StringVar(&configPath, "config-path", "configs/apiserver.toml", "path to config")
-	os.Setenv("db_log_level", "0")
 }
 
 func main() {
