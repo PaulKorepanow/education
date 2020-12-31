@@ -68,3 +68,15 @@ func TestUserRepository_DeleteByEmail(t *testing.T) {
 	assert.Nil(t, u)
 	assert.True(t, errors.Is(err, gorm.ErrRecordNotFound))
 }
+
+func TestUserRep_AddBookByEmail(t *testing.T) {
+	ts, teardown := sqlstore.TestStore(t, databaseURL)
+	defer teardown("users", "books")
+
+	err := ts.User().Create(model.TestUser(t))
+	assert.NoError(t, err)
+
+	user, err := ts.User().(*sqlstore.UserRep).AddBookByEmail(model.TestUser(t).Email, "SimpleBook")
+	assert.NoError(t, err)
+	assert.Len(t, user.Books, 1)
+}

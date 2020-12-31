@@ -12,6 +12,7 @@ type User struct {
 	Email             string `json:"email"`
 	Password          string `gorm:"-"`
 	EncryptedPassword string `json:"encrypted_password"`
+	Books             []Book `gorm:"foreignKey:UserRefer"`
 }
 
 func (u *User) BeforeCreation() error {

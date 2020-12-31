@@ -22,3 +22,7 @@ func (s *TestStore) User() store.UserRepository {
 
 	return &s.UserRep
 }
+
+func (s *TestStore) Book() store.BookRepository {
+	return nil
+}

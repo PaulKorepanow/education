@@ -8,6 +8,7 @@ import (
 type SqlStore struct {
 	db             *gorm.DB
 	userRepository *UserRep
+	bookRepository *BookRepository
 }
 
 func NewStore(db *gorm.DB) *SqlStore {
@@ -21,7 +22,21 @@ func (s *SqlStore) User() store.UserRepository {
 		return s.userRepository
 	}
 
-	s.userRepository = &UserRep{store: s}
+	s.userRepository = &UserRep{
+		store: s,
+	}
 
 	return s.userRepository
+}
+
+func (s *SqlStore) Book() store.BookRepository {
+	if s.bookRepository != nil {
+		return s.bookRepository
+	}
+
+	s.bookRepository = &BookRepository{
+		store: s,
+	}
+
+	return s.bookRepository
 }

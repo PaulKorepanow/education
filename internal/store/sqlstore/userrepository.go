@@ -60,3 +60,14 @@ func (r *UserRep) DeleteByEmail(email string) error {
 	}
 	return nil
 }
+
+func (r *UserRep) AddBookByEmail(email, title string) (*model.User, error) {
+	var u model.User
+	if err := r.store.db.Model(&u).
+		Where("email = ?", email).
+		Association("Books").
+		Append(&model.Book{Title: title}); err != nil {
+		return nil, err
+	}
+	return &u, nil
+}
