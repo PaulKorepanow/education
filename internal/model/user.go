@@ -5,10 +5,11 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 type User struct {
-	ID                int    `json:"id"`
+	gorm.Model
 	Email             string `json:"email"`
 	Password          string `gorm:"-"`
 	EncryptedPassword string `json:"encrypted_password"`

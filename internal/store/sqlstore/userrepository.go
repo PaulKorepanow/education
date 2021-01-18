@@ -63,8 +63,9 @@ func (r *UserRep) DeleteByEmail(email string) error {
 
 func (r *UserRep) AddBookByEmail(email, title string) (*model.User, error) {
 	var u model.User
-	if err := r.store.db.Model(&u).
+	if err := r.store.db.
 		Where("email = ?", email).
+		First(&u). //email unique field
 		Association("Books").
 		Append(&model.Book{Title: title}); err != nil {
 		return nil, err

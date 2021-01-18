@@ -8,6 +8,7 @@ import (
 )
 
 func TestBookRepository_Create(t *testing.T) {
+	t.Skip("Отключено для выяснения целесообразности CRUD для books")
 	tb, teardown := sqlstore.TestStore(t, databaseURL)
 	defer teardown("books")
 
@@ -17,6 +18,7 @@ func TestBookRepository_Create(t *testing.T) {
 }
 
 func TestBookRepository_FindByTitle(t *testing.T) {
+	t.Skip("Отключено для выяснения целесообразности CRUD для books")
 	tb, teardown := sqlstore.TestStore(t, databaseURL)
 	defer teardown("books")
 

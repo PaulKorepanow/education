@@ -1,6 +1,7 @@
 package sqlstore
 
 import (
+	"bookLibrary/internal/model"
 	"bookLibrary/internal/store"
 	"gorm.io/gorm"
 )
@@ -12,6 +13,9 @@ type SqlStore struct {
 }
 
 func NewStore(db *gorm.DB) *SqlStore {
+	if err := db.AutoMigrate(&model.User{}, &model.Book{}); err != nil {
+		panic(err)
+	}
 	return &SqlStore{
 		db: db,
 	}
