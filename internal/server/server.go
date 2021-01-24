@@ -80,6 +80,9 @@ func (s *Server) configureLogger(config *Config) error {
 }
 
 func (s *Server) configureRouter() {
-	s.router.HandleFunc("/users", s.handleUsersCreate()).Methods("POST")
-	s.router.HandleFunc("/sessions", s.handleSession()).Methods("POST")
+	s.router.HandleFunc("/api/user/new", s.handleUsersCreate()).Methods(http.MethodPost)
+	s.router.HandleFunc("/api/user/login", s.Authenticate()).Methods(http.MethodPost)
+	s.router.HandleFunc("/api/user/{id:[0-9]+}/password", s.UpdatePassword()).Methods(http.MethodPut)
+	s.router.HandleFunc("/api/user/{id:[0-9]+}/book", s.AddBook()).Methods(http.MethodPost)
+
 }

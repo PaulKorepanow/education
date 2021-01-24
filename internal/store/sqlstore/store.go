@@ -28,6 +28,7 @@ func (s *SqlStore) User() store.UserRepository {
 
 	s.userRepository = &UserRep{
 		store: s,
+		users: make(map[uint]*model.User),
 	}
 
 	return s.userRepository

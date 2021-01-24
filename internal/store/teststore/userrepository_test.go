@@ -37,7 +37,7 @@ func TestUserRepository_UpdatePasswordByEmail(t *testing.T) {
 	err := s.User().Create(model.TestUser(t))
 	assert.NoError(t, err)
 
-	_, err = s.User().UpdatePasswordByEmail(
+	_, err = s.User().UpdatePassword(
 		"p.corepanow@gmail.com",
 		"lol1lol2123345")
 	assert.NoError(t, err)

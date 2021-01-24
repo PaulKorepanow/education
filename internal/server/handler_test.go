@@ -5,6 +5,7 @@ import (
 	"bookLibrary/internal/server"
 	"bookLibrary/internal/store/teststore"
 	"bytes"
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -21,7 +22,7 @@ func TestHandler_handleUsersCreate(t *testing.T) {
 
 	request, err := http.NewRequest(
 		http.MethodPost,
-		"/users",
+		"/api/user/new",
 		bytes.NewBuffer(user),
 	)
 	assert.NoError(t, err)
@@ -43,11 +44,58 @@ func TestHandler_handleSessions(t *testing.T) {
 
 	request, err := http.NewRequest(
 		http.MethodPost,
-		"/sessions",
+		"/api/user/login",
 		bytes.NewBuffer(user),
 	)
 	assert.NoError(t, err)
 
 	ts.ServeHttp(rr, request)
 	assert.Equal(t, http.StatusOK, rr.Code)
+}
+
+func TestHandler_UpdatePassword(t *testing.T) {
+	testDB := teststore.NewTestStore()
+	testUser := model.TestUser(t)
+	testDB.User().Create(testUser)
+
+	testServer := server.NewServer(testDB)
+
+	w := httptest.NewRecorder()
+
+	newUser := model.NewUser(testUser.Email, "asdasczzvvdasaaqw1231231")
+	user, err := newUser.Marshal()
+	assert.NoError(t, err)
+
+	r, err := http.NewRequest(
+		http.MethodPut,
+		fmt.Sprintf("/api/user/%d/password", testUser.ID),
+		bytes.NewBuffer(user),
+	)
+	assert.NoError(t, err)
+
+	testServer.ServeHttp(w, r)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestHandler_AddBook(t *testing.T) {
+	testDB := teststore.NewTestStore()
+	testUser := model.TestUser(t)
+	testDB.User().Create(testUser)
+
+	testServer := server.NewServer(testDB)
+
+	w := httptest.NewRecorder()
+
+	user, err := testUser.Marshal()
+	assert.NoError(t, err)
+
+	r, err := http.NewRequest(
+		http.MethodPost,
+		fmt.Sprintf("/api/user/%d/book", testUser.ID),
+		bytes.NewBuffer(user),
+	)
+	assert.NoError(t, err)
+
+	testServer.ServeHttp(w, r)
+	assert.Equal(t, http.StatusOK, w.Code)
 }

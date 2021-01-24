@@ -5,14 +5,24 @@ import (
 	"flag"
 	"github.com/BurntSushi/toml"
 	"log"
+	"os"
 )
 
 var (
 	configPath string
+	logPath    string
 )
 
 func init() {
 	flag.StringVar(&configPath, "config-path", "configs/apiserver.toml", "path to config")
+	if err := os.Setenv("token_password", "secret"); err != nil {
+		panic(err)
+	}
+
+	if err := os.Setenv("log_path", "./logs/"); err != nil {
+		panic(err)
+	}
+
 }
 
 func main() {

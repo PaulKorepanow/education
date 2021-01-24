@@ -7,26 +7,30 @@ import (
 	"gorm.io/gorm/logger"
 	"log"
 	"os"
+	"path"
 	"strings"
 	"testing"
 	"time"
 )
 
-func TestStore(t *testing.T, databaseURL string) (*SqlStore, func(...string)) {
+func TestStore(t *testing.T, databaseURL, logPath string) (*SqlStore, func(...string)) {
 	t.Helper()
 
+	logFile, err := os.OpenFile(path.Join(logPath, "db.log"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	newLogger := logger.New(
-		log.New(os.Stdout, "\r\n", log.LstdFlags),
+		log.New(logFile, "\r\n", log.Lshortfile),
 		logger.Config{
 			SlowThreshold: time.Second,
 			Colorful:      false,
-			LogLevel:      logger.Silent,
+			LogLevel:      logger.Info,
 		},
 	)
 
-	newLogger.LogMode(logger.Silent)
-
-	st, err := gorm.Open(
+	db, err := gorm.Open(
 		postgres.Open(databaseURL),
 		&gorm.Config{
 			Logger: newLogger,
@@ -36,12 +40,13 @@ func TestStore(t *testing.T, databaseURL string) (*SqlStore, func(...string)) {
 		t.Fatal(err)
 	}
 
-	s := NewStore(st)
+	s := NewStore(db)
 	return s, func(tables ...string) {
 		if len(tables) > 0 {
 			if err := s.db.Exec(fmt.Sprintf("TRUNCATE %s CASCADE", strings.Join(tables, ", "))).Error; err != nil {
 				t.Fatal(err)
 			}
 		}
+		logFile.Close()
 	}
 }

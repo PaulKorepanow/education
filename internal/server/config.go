@@ -3,7 +3,7 @@ package server
 type Config struct {
 	BindAddr string `toml:"bind_addr"`
 	LogLevel string `toml:"log_level"`
-	Store    string `toml:"databaseURL"`
+	Store    string `toml:"database_url"`
 }
 
 func NewConfig() *Config {

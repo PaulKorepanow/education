@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"errors"
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
 	"golang.org/x/crypto/bcrypt"
@@ -10,10 +11,17 @@ import (
 
 type User struct {
 	gorm.Model
-	Email             string `json:"email"`
+	Email             string `gorm:"uniqueIndex"; json:"email"`
 	Password          string `gorm:"-"`
 	EncryptedPassword string `json:"encrypted_password"`
 	Books             []Book `gorm:"foreignKey:UserRefer"`
+}
+
+func NewUser(email, password string) *User {
+	return &User{
+		Email:    email,
+		Password: password,
+	}
 }
 
 func (u *User) BeforeCreation() error {
@@ -26,6 +34,14 @@ func (u *User) BeforeCreation() error {
 		u.EncryptedPassword = enc
 	}
 
+	return nil
+}
+
+func (u *User) CleanPassword() error {
+	if u.EncryptedPassword == "" {
+		return errors.New("secure password not generated")
+	}
+	u.Password = ""
 	return nil
 }
 

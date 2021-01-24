@@ -9,7 +9,7 @@ import (
 
 func TestBookRepository_Create(t *testing.T) {
 	t.Skip("Отключено для выяснения целесообразности CRUD для books")
-	tb, teardown := sqlstore.TestStore(t, databaseURL)
+	tb, teardown := sqlstore.TestStore(t, databaseURL, logPath)
 	defer teardown("books")
 
 	bookRep := tb.Book()
@@ -19,7 +19,7 @@ func TestBookRepository_Create(t *testing.T) {
 
 func TestBookRepository_FindByTitle(t *testing.T) {
 	t.Skip("Отключено для выяснения целесообразности CRUD для books")
-	tb, teardown := sqlstore.TestStore(t, databaseURL)
+	tb, teardown := sqlstore.TestStore(t, databaseURL, "")
 	defer teardown("books")
 
 	err := tb.Book().Create(model.TestBook(t))

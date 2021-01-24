@@ -2,16 +2,16 @@ package sqlstore_test
 
 import (
 	"bookLibrary/internal/store/sqlstore"
-	"errors"
+	"fmt"
+	"golang.org/x/crypto/bcrypt"
 	"testing"
 
 	"bookLibrary/internal/model"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
 func TestUserRepository_Create(t *testing.T) {
-	s, teardown := sqlstore.TestStore(t, databaseURL)
+	s, teardown := sqlstore.TestStore(t, databaseURL, logPath)
 	defer teardown("users")
 
 	newUser := model.TestUser(t)
@@ -22,7 +22,7 @@ func TestUserRepository_Create(t *testing.T) {
 }
 
 func TestUserRepository_FindByEmail(t *testing.T) {
-	s, teardown := sqlstore.TestStore(t, databaseURL)
+	s, teardown := sqlstore.TestStore(t, databaseURL, logPath)
 	defer teardown("users")
 
 	err := s.User().Create(model.TestUser(t))
@@ -32,17 +32,16 @@ func TestUserRepository_FindByEmail(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, user.Email, "p.corepanow@gmail.com")
-	//assert.Equal(t, user.password, "123456789")
 }
 
 func TestUserRepository_UpdatePasswordByEmail(t *testing.T) {
-	s, teardown := sqlstore.TestStore(t, databaseURL)
+	s, teardown := sqlstore.TestStore(t, databaseURL, logPath)
 	defer teardown("users")
 
 	err := s.User().Create(model.TestUser(t))
 	assert.NoError(t, err)
 
-	_, err = s.User().UpdatePasswordByEmail(
+	_, err = s.User().UpdatePassword(
 		"p.corepanow@gmail.com",
 		"lol1lol2123345")
 	assert.NoError(t, err)
@@ -51,11 +50,11 @@ func TestUserRepository_UpdatePasswordByEmail(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, user.Email, "p.corepanow@gmail.com")
-	//assert.Equal(t, user.password, "lol1lol2123345")
+	assert.NoError(t, bcrypt.CompareHashAndPassword([]byte(user.EncryptedPassword), []byte("lol1lol2123345")))
 }
 
 func TestUserRepository_DeleteByEmail(t *testing.T) {
-	s, teardown := sqlstore.TestStore(t, databaseURL)
+	s, teardown := sqlstore.TestStore(t, databaseURL, logPath)
 	defer teardown("users")
 
 	err := s.User().Create(model.TestUser(t))
@@ -66,11 +65,11 @@ func TestUserRepository_DeleteByEmail(t *testing.T) {
 
 	u, err := s.User().FindByEmail("p.corepanow@gmail.com")
 	assert.Nil(t, u)
-	assert.True(t, errors.Is(err, gorm.ErrRecordNotFound))
+	assert.EqualError(t, err, fmt.Sprintf("user with email(%s) not found", "p.corepanow@gmail.com"))
 }
 
 func TestUserRep_AddBookByEmail(t *testing.T) {
-	ts, teardown := sqlstore.TestStore(t, databaseURL)
+	ts, teardown := sqlstore.TestStore(t, databaseURL, logPath)
 	defer teardown("users", "books")
 
 	err := ts.User().Create(model.TestUser(t))
